@@ -37,7 +37,7 @@ x64/
 *.vspscc
 *.vssscc
 .builds
-PSReadline.zip
+*.zip
 
 # Visual C++ cache files
 ipch/
