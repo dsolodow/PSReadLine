@@ -7,8 +7,6 @@ namespace PSConsoleUtilities
 {
     public partial class PSConsoleReadLine
     {
-        private static Func<CommandAst, bool, object> _staticParameterBinder;
-
         /// <summary>
         /// Insert the key
         /// </summary>
@@ -163,26 +161,45 @@ namespace PSConsoleUtilities
             }
         }
 
+        private void DeleteCharImpl(bool orExit)
+        {
+            if (_visualSelectionCommandCount > 0)
+            {
+                int start, length;
+                GetRegion(out start, out length);
+                Delete(start, length);
+                return;
+            }
+
+            if (_buffer.Length > 0)
+            {
+                if (_current < _buffer.Length)
+                {
+                    SaveEditItem(EditItemDelete.Create(new string(_buffer[_current], 1), _current));
+                    _buffer.Remove(_current, 1);
+                    Render();
+                }
+            }
+            else if (orExit)
+            {
+                throw new ExitException();
+            }
+        }
+
         /// <summary>
         /// Delete the character under the cursor.
         /// </summary>
         public static void DeleteChar(ConsoleKeyInfo? key = null, object arg = null)
         {
-            if (_singleton._visualSelectionCommandCount > 0)
-            {
-                int start, length;
-                _singleton.GetRegion(out start, out length);
-                Delete(start, length);
-                return;
-            }
+            _singleton.DeleteCharImpl(orExit: false);
+        }
 
-            if (_singleton._buffer.Length > 0 && _singleton._current < _singleton._buffer.Length)
-            {
-                _singleton.SaveEditItem(
-                    EditItemDelete.Create(new string(_singleton._buffer[_singleton._current], 1), _singleton._current));
-                _singleton._buffer.Remove(_singleton._current, 1);
-                _singleton.Render();
-            }
+        /// <summary>
+        /// Delete the character under the cursor, or if the line is empty, exit the process
+        /// </summary>
+        public static void DeleteCharOrExit(ConsoleKeyInfo? key = null, object arg = null)
+        {
+            _singleton.DeleteCharImpl(orExit: true);
         }
 
         private bool AcceptLineImpl(bool validate)
@@ -264,28 +281,6 @@ namespace PSConsoleUtilities
                         {
                             _current = commandAst.CommandElements[0].Extent.EndOffset;
                             return string.Format(PSReadLineResources.CommandNotFoundError, commandName);
-                        }
-
-                        // This code is written in a peculiar manner so that we can compile and run
-                        // against PowerShell V3 but take advantage of an API added to V4.
-                        if (_staticParameterBinder != null && StaticParameterBindingSupported(commandInfo))
-                        {
-                            dynamic bindingResult = _staticParameterBinder(commandAst, true);
-                            if (bindingResult != null && bindingResult.BindingExceptions != null)
-                            {
-                                foreach (dynamic failure in bindingResult.BindingExceptions)
-                                {
-                                    if (failure.Value.CommandElement != null)
-                                    {
-                                        // The cast is necessary here because Extent is an instance of an
-                                        // internal class and dynamic treats that like object so won't
-                                        // find the EndOffset property w/o a cast to the public interface.
-                                        var extent = (IScriptExtent)failure.Value.CommandElement.Extent;
-                                        _current = extent.EndOffset;
-                                    }
-                                    return failure.Value.BindingException.Message;
-                                }
-                            }
                         }
                     }
                 }

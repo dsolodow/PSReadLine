@@ -14,6 +14,8 @@ using PSConsoleUtilities.Internal;
 
 namespace PSConsoleUtilities
 {
+    class ExitException : Exception { }
+
     public partial class PSConsoleReadLine : IPSConsoleReadLineMockableMethods
     {
         private static readonly PSConsoleReadLine _singleton;
@@ -233,8 +235,18 @@ namespace PSConsoleUtilities
                 // Console is exiting - return value isn't too critical - null or 'exit' could work equally well.
                 return "";
             }
+            catch (ExitException)
+            {
+                return "exit";
+            }
             catch (Exception e)
             {
+                // If we're running tests, just throw.
+                if (_singleton._mockableMethods != _singleton)
+                {
+                    throw;
+                }
+
                 while (e.InnerException != null)
                 {
                     e = e.InnerException;
@@ -424,23 +436,6 @@ namespace PSConsoleUtilities
 
             // This is only used for post-mortem debugging - 200 keys should be enough to reconstruct most command lines.
             _lastNKeys = new HistoryQueue<ConsoleKeyInfo>(200);
-
-
-            var staticParameterBinderType =
-                typeof (PSObject).Assembly.GetType("System.Management.Automation.Language.StaticParameterBinder");
-            if (staticParameterBinderType != null)
-            {
-                var binderMethod =
-                    staticParameterBinderType.GetMethod("BindCommand", new[] {typeof (CommandAst), typeof (bool)});
-                if (binderMethod != null)
-                {
-                    var arg1 = Expression.Parameter(typeof (CommandAst));
-                    var arg2 = Expression.Parameter(typeof (bool));
-                    _staticParameterBinder = Expression.Lambda<Func<CommandAst, bool, object>>(
-                        Expression.Call(binderMethod, arg1, arg2),
-                        new[] {arg1, arg2}).Compile();
-                }
-            }
         }
 
         private PSConsoleReadLine()
@@ -522,7 +517,6 @@ namespace PSConsoleUtilities
             _yankCommandCount = 0;
             _yankLastArgCommandCount = 0;
             _tabCommandCount = 0;
-            _searchHistoryCommandCount = 0;
             _recallHistoryCommandCount = 0;
             _visualSelectionCommandCount = 0;
             _hashedHistory = null;
@@ -532,6 +526,18 @@ namespace PSConsoleUtilities
                 _currentHistoryIndex = _getNextHistoryIndex;
                 UpdateFromHistory(moveCursor: true);
                 _getNextHistoryIndex = 0;
+                if (_searchHistoryCommandCount > 0)
+                {
+                    _searchHistoryPrefix = "";
+                    if (Options.HistoryNoDuplicates)
+                    {
+                        _hashedHistory = new Dictionary<string, int>();
+                    }
+                }
+            }
+            else
+            {
+                _searchHistoryCommandCount = 0;
             }
         }
 
