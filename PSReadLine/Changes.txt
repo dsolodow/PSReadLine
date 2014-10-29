@@ -11,6 +11,8 @@ New features:
 
 Bug fixes:
 * Occasional exception with AcceptAndGetNext (Ctrl+O) followed by something other than Enter
+* Event handlers that register for the engine event PowerShell.OnIdle should work now.
+* ClearScreen now just clears the visible screen, not the entire buffer.
 
 New functions:
 * ValidateAndAcceptLine
@@ -19,10 +21,14 @@ New functions:
     the command to history and clear the error after an edit.
 * DeleteCharOrExit
     - emulate Ctrl+D in bash properly by exiting the process if the command line is empty
+* ScrollDisplayUpLine, ScrollDisplayDownLine
+    Scroll the screen up or down by a line instead of by the screen
 
 New key bindings:
 * Ctrl+D bound to DeleteCharOrExit in Emacs mode
 * Ctrl+N/Ctrl+P bound to NextHistory/PreviousHistory in Emacs mode
+* Ctrl+PageUp bound to ScrollDisplayUpLine
+* Ctrl+PageDown bound to ScrollDisplayDownLine
 
 New options:
 * Set-PSReadlineOption
@@ -33,6 +39,9 @@ New options:
       -ValidationHandler
           A delegate that is called from ValidateAndAcceptLine that can perform custom validation
 
+New cmdlet:
+* Remove-PSReadlineKeyHandler
+    This will remove a key binding for previously bound keys.
 
 ### Version 1.0.0.12
 
