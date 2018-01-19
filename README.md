@@ -1,6 +1,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/0xu8r817dl6qt0g4?svg=true)](https://ci.appveyor.com/project/lzybkr/psreadline)
 
-#PSReadLine
+# PSReadLine
 
 This module replaces the command line editing experience in PowerShell.exe for versions 3 and up.
 It provides:
@@ -25,7 +25,7 @@ Keith Hill wrote a great introduction to PSReadline [here](http://rkeithhill.wor
 
 Ed Wilson (Scripting Guy) wrote a series on PSReadline, starting [here](http://blogs.technet.com/b/heyscriptingguy/archive/2014/06/16/the-search-for-a-better-powershell-console-experience.aspx)
 
-##Installation
+## Installation
 
 There are multiple ways to install PSReadline.
 
@@ -51,7 +51,7 @@ Edit your profile to import the module. This step is optional with PowerShell V5
 
 The file `C:\Users\[User]\Documents\WindowsPowerShell\profile.ps1` is used for all hosts (e.g. the ISE and powershell.exe).  If you already have this file, then you should add the following:
 
-```
+```powershell
 if ($host.Name -eq 'ConsoleHost')
 {
     Import-Module PSReadline
@@ -60,13 +60,13 @@ if ($host.Name -eq 'ConsoleHost')
 
 Alternatively, the file `C:\Users\[User]\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` is for powershell.exe only.  Using this file, you can simply add:
 
-```
-Import-Module PSReadLine  
+```powershell
+Import-Module PSReadLine
 ```
 
 In either case, you can create the appropriate file if you don't already have one.
 
-##Upgrading
+## Upgrading
 
 When running one of the suggested commands below, be sure to exit all instances of powershell.exe, then run the suggested command from cmd.exe, powershell_ise.exe, or via the Win+R shortcut to make sure PSReadline isn't loaded.
 
@@ -76,7 +76,7 @@ If you've installed PSReadline yourself from the PowerShell Gallery or with `PSG
 
 If you get an error like:
 
-```
+```powershell
 Remove-Item : Cannot remove item
 C:\Users\{yourName}\Documents\WindowsPowerShell\Modules\PSReadLine\PSReadline.dll: Access to the path
 'C:\Users\{yourName}\Documents\WindowsPowerShell\Modules\PSReadLine\PSReadline.dll' is denied.
@@ -85,7 +85,7 @@ At C:\Users\{yourName}\Documents\WindowsPowerShell\Modules\PsGet\PsGet.psm1:1009
 
 Then you didn't kill all the processes that loaded PSReadline.
 
-##Usage
+# #Usage
 
 To start using, just import the module:
 
@@ -100,6 +100,7 @@ Set-PSReadlineOption -EditMode Emacs
 ```
 
 To view the current key bindings:
+
 ```powershell
 Get-PSReadlineKeyHandler
 ```
@@ -164,10 +165,10 @@ If you want to change the command line in some unimplmented way in your custom k
     [Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition
 ```
 
-##Change Log
+## Change Log
 
 The change log is available [here](https://github.com/lzybkr/PSReadLine/blob/master/PSReadLine/Changes.txt).
 
-##License
+## License
 
 The license is available [here](https://github.com/lzybkr/PSReadLine/blob/master/PSReadLine/License.txt).
